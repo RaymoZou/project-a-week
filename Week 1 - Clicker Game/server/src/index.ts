@@ -2,14 +2,20 @@ import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import { router } from './router';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
+import { User } from './models/user';
+import bcrypt from 'bcrypt';
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 
+// mongoose setup
+// (mongoose buffers all the commands - don't have to wait for this connection)
+mongoose.connect(process.env.MONGODB_URI as string);
+
 const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(' ')[1];
-
     try {
         if (!token) return res.status(401).json({ message: 'no jwt token provided' });
         jwt.verify(token, process.env.SECRET_KEY as string, (err, decoded) => {
@@ -22,30 +28,59 @@ const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-app.post('/login', (req: Request, res: Response) => {
-    const username = req.body.username;
-    const password = req.body.password;
-
-    // TODO: implement storing username + password hash on mongoDB with bcrypt
-    // verify user credentials
-    // for now: only valid credentials are {username: user, password: pass}
-
-    if (username === 'user' && password === 'pass') {
-        var token = jwt.sign({ username }, process.env.SECRET_KEY as string, {
-            // 1 hour
-            expiresIn: 60 * 60
-        });
-        res.cookie("jwt", token);
-        res.status(200).json({ message: 'login success' });
-    } else {
-        res.status(401).json({ message: 'login failure' });
+app.post('/signup', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const username = req.body.username;
+        const hash = await bcrypt.hash(req.body.password, 10);
+        const user = new User({ username, hash });
+        console.log(hash);
+        await user.save();
+        res.status(200).json({ message: "user saved" });
+    } catch (err) {
+        next(err);
     }
+    next();
+})
+
+// return a jwt token if successful
+app.post('/login', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const username = req.body.username;
+        const plainText = req.body.password;
+        // query user
+        const user = await User.findOne({ username: username });
+        if (!user) throw new Error("user not found");
+        const isValid = await bcrypt.compare(plainText, user.hash);
+        if (isValid) {
+            // generate jwt and store as cookie
+            var token = jwt.sign({ username }, process.env.SECRET_KEY as string, {
+                // 1 hour
+                expiresIn: 60 * 60
+            });
+            res.cookie("jwt", token);
+            res.status(200).json({ jwt: token });
+            // res.status(200).json({ message: "valid" });
+        } else {
+            res.status(401).json({ message: "is not valid" });
+        }
+    } catch (err) {
+        next(err);
+    };
+
+
+    // if (username === 'user' && password === 'pass') {
+    //     var token = jwt.sign({ username }, process.env.SECRET_KEY as string, {
+    //         // 1 hour
+    //         expiresIn: 60 * 60
+    //     });
+    //     res.cookie("jwt", token);
+    //     res.status(200).json({ jwt: token });
+    // } else {
+    //     res.status(401).json({ message: 'login failure' });
+    // };
 });
 
-app.use('/api', router)
-app.get('/auth', isAuthenticated, (req: Request, res: Response, next) => {
-    res.json('this is authorized route');
-});
+app.use('/api', isAuthenticated, router)
 
 app.listen(process.env.PORT || 3000, () => {
     console.log(`listening on port ${process.env.PORT || 3000}`);
