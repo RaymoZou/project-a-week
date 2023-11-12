@@ -5,9 +5,11 @@ import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { User } from './models/user';
 import bcrypt from 'bcrypt';
+import cors from 'cors';
 dotenv.config();
 
 const app = express();
+app.use(cors);
 app.use(express.json());
 
 // mongoose setup
