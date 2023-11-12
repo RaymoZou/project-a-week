@@ -9,7 +9,15 @@ import cors from 'cors';
 dotenv.config();
 
 const app = express();
-app.use(cors);
+// const corsOptions = {
+//     origin: 'http://localhost:5173', // Replace with your client's origin
+//     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+//     credentials: true,
+//     optionsSuccessStatus: 204,
+// };
+
+app.use(cors());
+
 app.use(express.json());
 
 // mongoose setup
@@ -31,6 +39,7 @@ const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
 };
 
 app.post('/signup', async (req: Request, res: Response, next: NextFunction) => {
+    console.log('POST request received');
     try {
         const username = req.body.username;
         const hash = await bcrypt.hash(req.body.password, 10);
