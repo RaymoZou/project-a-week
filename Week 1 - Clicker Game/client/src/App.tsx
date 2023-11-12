@@ -1,34 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import './styles.css'
+import { Button, Flex, FormControl, FormLabel, Input } from '@chakra-ui/react';
+import { useState } from 'react';
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [formData, setFormData] = useState({
+    username: '',
+    password: ''
+  });
+
+  const submitForm = () => console.log('clicked!');
+
+  const handleInputChange = (e) => {
+      
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    // <Flex bg='tomato' h='100vh' justify='center' align='center'>
+    //   <h1>Welcome to Clicker Game!</h1>
+    //   <FormControl>
+    //     <FormLabel>Email address</FormLabel>
+    //     <Input type='email' />
+    //     <FormHelperText>We'll never share your email.</FormHelperText>
+    //   </FormControl>
+    // </Flex>
+    <Flex h='100vh' justify='center' align='center' direction='column'>
+      {/* <Button onClick={click}>Click Me</Button> */}
+      <form action="">
+        <FormControl w='max-content'>
+          <FormLabel>Username</FormLabel>
+          <Input type='email' autoComplete='username' />
+        </FormControl>
+        <FormControl w='max-content'>
+          <FormLabel>Password</FormLabel>
+          <Input type='password' autoComplete='current-password' />
+        </FormControl>
+        <Button>Submit</Button>
+      </form>
+    </Flex>
   )
 }
 
