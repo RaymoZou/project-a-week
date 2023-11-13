@@ -1,4 +1,4 @@
-import { Flex, FormControl, FormLabel, Input, Button } from "@chakra-ui/react";
+import { Flex, FormControl, FormLabel, Input, Button, Heading } from "@chakra-ui/react";
 import { useState } from 'react';
 import axios from 'axios';
 
@@ -29,8 +29,8 @@ const Signup = () => {
         }));
     }
 
-    return <Flex h='100vh' justify='center' align='center' direction='column'>
-        <h1>Sign Up</h1>
+    return <Flex h='100vh' justify='center' align='center' direction='column' gap={8}>
+        <Heading>Sign Up</Heading>
         <form action="">
             <FormControl w='max-content'>
                 <FormLabel>Username</FormLabel>

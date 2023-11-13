@@ -1,4 +1,4 @@
-import { Flex, FormControl, FormLabel, Input, Button } from "@chakra-ui/react";
+import { Flex, FormControl, FormLabel, Input, Button, Heading } from "@chakra-ui/react";
 import { useState } from 'react';
 import axios from 'axios';
 
@@ -14,7 +14,6 @@ const Login = () => {
         // TODO: replace hard-coded URL with .env variable
         try {
             const res = await axios.post('http://localhost:3000/login', formData);
-            console.log(res);
             localStorage.setItem('jwt', res.data.jwt);
         } catch (err) {
             console.log(err);
@@ -30,8 +29,8 @@ const Login = () => {
         }));
     }
 
-    return <Flex h='100vh' justify='center' align='center' direction='column'>
-        <h1>Login</h1>
+    return <Flex h='100vh' justify='center' align='center' direction='column' gap={8}>
+        <Heading>Login</Heading>
         <form action="">
             <FormControl w='max-content'>
                 <FormLabel>Username</FormLabel>

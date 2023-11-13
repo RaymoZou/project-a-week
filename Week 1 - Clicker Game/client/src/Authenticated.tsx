@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Spinner } from '@chakra-ui/react'
+import { Flex } from '@chakra-ui/react'
 const Authenticated = (): JSX.Element => {
 
-    const [message, setMessage] = useState(null);
+    const [message, setMessage] = useState('You are not authenticated.');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -19,7 +19,9 @@ const Authenticated = (): JSX.Element => {
         fetchData();
     }, [])
 
-    return message ? <div>{message}</div> : <Spinner />
+    return <Flex justify='center' align='center'>
+        {message}
+    </Flex>
 }
 
 export default Authenticated;
