@@ -27,7 +27,7 @@ mongoose.connect(process.env.MONGODB_URI as string);
 const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(' ')[1];
     try {
-        if (!token) return res.status(401).json({ message: 'no jwt token provided' });
+        if (!token) return res.status(200).json({ message: 'no jwt token provided' });
         jwt.verify(token, process.env.SECRET_KEY as string, (err, decoded) => {
             if (err) throw err;
         });
@@ -91,7 +91,7 @@ app.post('/login', async (req: Request, res: Response, next: NextFunction) => {
     // };
 });
 
-app.use('/api', isAuthenticated, router)
+app.use('/authenticated', isAuthenticated, router)
 
 app.listen(process.env.PORT || 3000, () => {
     console.log(`listening on port ${process.env.PORT || 3000}`);
