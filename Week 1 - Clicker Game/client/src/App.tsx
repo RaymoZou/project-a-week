@@ -1,12 +1,10 @@
-// import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './Login';
 import Signup from './Signup';
 import Navbar from './Navbar';
+import Authenticated from './Authenticated';
 
 const App = () => {
-
-
 
   return (
     <Router>
@@ -16,6 +14,7 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/authenticated" element={<Authenticated/>} />
         </Routes>
       </div>
     </Router>

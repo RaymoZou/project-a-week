@@ -13,8 +13,9 @@ const Login = () => {
         e.preventDefault();
         // TODO: replace hard-coded URL with .env variable
         try {
-            const res = await axios.post('http://localhost:3000/signup', formData);
+            const res = await axios.post('http://localhost:3000/login', formData);
             console.log(res);
+            localStorage.setItem('jwt', res.data.jwt);
         } catch (err) {
             console.log(err);
         }
