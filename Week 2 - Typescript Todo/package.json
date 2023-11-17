@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "inquirer": "^9.2.12"
+  },
+  "scripts": {
+    "start": "nodemon src/index.ts",
+    "build": "tsc --watch"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.9.1"
+  },
+  "type": "module"
+}

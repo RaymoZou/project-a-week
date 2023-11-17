@@ -1,1 +1,5 @@
+# compiled js files
 build
+
+# node modules
+node_modules
