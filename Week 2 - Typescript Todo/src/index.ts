@@ -4,19 +4,26 @@ import pg, { Client } from 'pg';
 
 var client: Client;
 
-const getInput = async (client: Client) => {
+const choices = [
+    'Create a new TODO ✏️',
+    'View all TODOs 🔍',
+    'Quit 🚪',
+
+];
+
+const getInput = async () => {
     const answer = await inquirer.prompt([{
         type: 'list',
         name: 'action',
         message: 'What would you like to do?',
-        choices: ['Create a new TODO', 'View all TODOs', 'Quit'],
+        choices: choices,
     },
     ]);
 
     return answer.action;
 };
 
-const connect_database = async () => {
+const connectDB = async () => {
     try {
         console.log('Connecting to database...');
         client = new pg.Client();
@@ -42,7 +49,7 @@ const printTodos = async () => {
     }
 };
 
-const initiate_db = async (client: Client) => {
+const initiateDB = async () => {
     try {
         await client.query(
             `CREATE TABLE todos (
@@ -58,24 +65,20 @@ const initiate_db = async (client: Client) => {
 const main = async () => {
     try {
         // connect to local postgreSQL database
-        const client = await connect_database();
+        const client = await connectDB();
 
         // enter cli loop
         while (true) {
-            const action = await getInput(client);
+            const action = await getInput();
             switch (action) {
-                case 'Create a new TODO':
+                case choices[0]:
                     console.log('TODO: implement create new TODO function');
                     break;
-                case 'View all TODOs':
+                case choices[1]:
                     await printTodos();
                     break;
-                case 'Quit':
-                    break;
-                default:
-                    console.error('Unexpected error has occurred, try again');
             };
-            if (action === 'Quit') break;
+            if (action === choices[2]) break;
         }
     } catch (err) {
         console.error(err);
