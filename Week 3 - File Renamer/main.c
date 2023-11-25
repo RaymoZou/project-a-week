@@ -6,31 +6,35 @@ int main() {
     // allocate a buffer of 100
 
     int MAX_BUFFER_SIZE = 100;
+    int MAX_STRING_SIZE = 10;
+
     char char_buffer[MAX_BUFFER_SIZE];
-    // array of 10 pointers
-    // char *pointer_arr[10];
-    char *pointer;
+    int curr_index = 0;
+    char *pointer_arr[MAX_STRING_SIZE];
+    char *temp_pointer;
 
-    printf("What is your name? \n");
-    scanf("%s", char_buffer);
-    // printf("%d", sizeof(char_buffer));
+    while (1) {
+        printf("Enter string:\n");
+        scanf("%s", char_buffer);
 
-    // if string length + 1 exceeds char_buffer size, return error
-    if ((strlen(char_buffer) + 1) > MAX_BUFFER_SIZE) {
-        fprintf(stderr, "Error reading input.\n");
-        return -1;
+        // if size of string exceeds MAX_BUFFER_SIZE, return error
+        if ((strlen(char_buffer) + 1) > MAX_BUFFER_SIZE) {
+            fprintf(stderr, "Error reading input.\n");
+            return -1;
+        };
+
+        temp_pointer = malloc((strlen(char_buffer) + 1) * sizeof(char));
+        strcpy(temp_pointer, char_buffer);
+        pointer_arr[curr_index] = temp_pointer;
+
+        // print all the strings that have been stored so far
+        for (int i = 0; i <= curr_index; i++) {
+            // printf("%d\n", i);
+            printf("Item stored at index %d: %s\n", i, pointer_arr[i]);
+        };
+
+        curr_index++;
     };
-
-    // allocate memory
-    pointer = malloc((strlen(char_buffer) + 1) * sizeof(char));
-    // copy buffer -> name
-    strcpy(pointer, char_buffer);
-
-    // Print information about the name entered
-    printf("Your name is %s\n", pointer);
-    printf("String length: %d\n", strlen(pointer));
-
-    free(pointer);
 
     return 0;
 }
