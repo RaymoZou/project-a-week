@@ -1,2 +1,2 @@
 compile:
-	g++ -o main main.cpp
+	cl main.cpp user32.lib
