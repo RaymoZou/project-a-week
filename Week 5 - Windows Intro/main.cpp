@@ -8,6 +8,27 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
         case WM_DESTROY:
             PostQuitMessage(0);
             break;
+        case WM_LBUTTONDOWN:
+            OutputDebugStringW(L"What up");
+            break;
+        case WM_TIMER:
+            OutputDebugStringW(L"Timer has expired....");
+            // SetWindowPos(hwnd, 0, 100, 100, 300, 300, 0);
+            RECT dimensions;
+            GetWindowRect(hwnd, &dimensions);
+            break;
+        case WM_PAINT: {
+            // create PAINTSTRUCT
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hwnd, &ps);
+
+            HBRUSH hbr;
+            FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+
+            EndPaint(hwnd, &ps);
+            OutputDebugStringW(L"W_PAINT\n");
+            break;
+        }
         default:
             return DefWindowProcW(hwnd, msg, wparam, lparam);
             break;
@@ -23,7 +44,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PWSTR pCmdLine,
     wc.hInstance = hInstance;
     wc.lpszClassName = L"Testing";
 
-    // RegisterClassW(&wc);
+    // RegisterClassW will return 0 if function call fails
     if (!RegisterClassW(&wc)) {
         MessageBoxW(NULL, L"Window Registration Failed!", L"ERROR",
                     MB_ICONEXCLAMATION | MB_OK);
@@ -31,15 +52,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PWSTR pCmdLine,
     };
 
     // Create Window (CreateWindowW)
-    HWND hwnd = CreateWindowW(wc.lpszClassName, L"Testing",
+    HWND hwnd = CreateWindowW(wc.lpszClassName, L"Cool Window Name",
                               WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, 800, 800,
                               0, 0, hInstance, 0);
 
-    // if (hwnd == NULL) {
-    //     MessageBoxW(NULL, L"Window Creation Failed", L"ERROR",
-    //                 MB_ICONEXCLAMATION | MB_OK);
-    //     return -1;
-    // };
+    if (hwnd == NULL) {
+        MessageBoxW(NULL, L"Window Creation Failed", L"ERROR",
+                    MB_ICONEXCLAMATION | MB_OK);
+        return -1;
+    };
+
+    // Create a 3 second timer
+    SetTimer(hwnd, 0, 1000, 0);
 
     ShowWindow(hwnd, nCmdShow);
 
