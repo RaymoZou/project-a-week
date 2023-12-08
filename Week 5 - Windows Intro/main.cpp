@@ -22,8 +22,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
 
-            HBRUSH hbr;
-            FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+            LOGBRUSH logBrush;
+            logBrush.lbStyle = BS_SOLID;
+            logBrush.lbColor = 0x00AF8558;
+            logBrush.lbHatch = 0;  // what is this
+            HBRUSH hbr = CreateBrushIndirect(&logBrush);
+            FillRect(hdc, &ps.rcPaint, hbr);
 
             EndPaint(hwnd, &ps);
             OutputDebugStringW(L"W_PAINT\n");
