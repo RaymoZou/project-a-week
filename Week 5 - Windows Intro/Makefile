@@ -1,2 +1,2 @@
 compile:
-	cl main.cpp user32.lib
+	cl /Zi main.cpp user32.lib Gdi32.lib
