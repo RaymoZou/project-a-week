@@ -4,10 +4,65 @@ int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
 // game properties
-float velocity = 2.5;      // player fall speed
-float gravity_scale = 0.5; // player gravity scale
-int update_time = 10;    // how often the game state updates in milliseconds
+float velocity = 2.5;       // player fall speed
+float gravity_scale = 0.5;  // player gravity scale
+float jumpForce = -12;      // how high the player jumps when space is pressed
+int update_time = 10;       // how often the game state updates in milliseconds
+float pipe_velocity = -5;   // how fast the pipe is moving towards the player
+float pipe_spawn_rate = 2000;  // spawn rate of the pipes
 
+class PipeWindow {
+   private:
+    static const int WINDOW_LENGTH = 200;
+    static const int WINDOW_HEIGHT = 800;
+
+   public:
+    HWND hwnd;
+
+    static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam,
+                                       LPARAM lparam) {
+        switch (msg) {
+            case WM_CLOSE:
+                DestroyWindow(hwnd);
+                break;
+            case WM_TIMER:
+                // TODO: Refactor into a MovePipe function
+                RECT pipePos;
+                if (GetWindowRect(hwnd, &pipePos) == 0) {
+                    return -1;
+                    // TODO: handle error
+                };
+
+                if (pipePos.left + pipe_velocity < 0) DestroyWindow(hwnd);
+
+                if (MoveWindow(hwnd, pipePos.left + pipe_velocity, pipePos.top,
+                               WINDOW_LENGTH, WINDOW_HEIGHT, FALSE) == 0)
+                    // TODO: handle error
+                    return -1;
+
+                break;
+            default:
+                return DefWindowProcW(hwnd, msg, wparam, lparam);
+        };
+        return 0;
+    };
+
+    PipeWindow() {
+        WNDCLASSW wc = {0};
+        wc.lpfnWndProc = &WindowProc;
+        wc.lpszClassName = L"Pipe Window";
+        wc.hInstance = GetModuleHandle(NULL);
+
+        RegisterClassW(&wc);
+        hwnd = CreateWindowW(wc.lpszClassName, L"Pipe",
+                             WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+                             screenWidth - WINDOW_LENGTH, 0, WINDOW_LENGTH,
+                             WINDOW_HEIGHT, 0, 0, GetModuleHandle(NULL), 0);
+
+        // Set pipe velocity
+        SetTimer(hwnd, 0, update_time, 0);
+    };
+};
 class MainWindow {
    public:
     HWND hwnd;
@@ -22,6 +77,7 @@ class MainWindow {
                 break;
             case WM_DESTROY:
                 PostQuitMessage(0);
+                break;
             default:
                 return DefWindowProcW(hwnd, msg, wparam, lparam);
         };
@@ -37,6 +93,8 @@ class MainWindow {
         hwnd = CreateWindowW(wc.lpszClassName, L"Main",
                              WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, 800, 800,
                              0, 0, hInstance, 0);
+        // Set pipe spawn rate
+        SetTimer(hwnd, 0, pipe_spawn_rate, 0);
     };
 };
 
@@ -86,10 +144,14 @@ class PlayerWindow {
                     // TODO: handle error
                     return -1;
 
-                return 0;
                 break;
             case WM_DESTROY:
                 // Do nothing - quit message only sent from Main Window
+            case WM_KEYDOWN:
+                if (wparam == VK_SPACE) {
+                    velocity = jumpForce;
+                };
+                break;
             default:
                 return DefWindowProcW(hwnd, msg, wparam, lparam);
         };
@@ -109,14 +171,18 @@ class PlayerWindow {
     };
 };
 
+TIMERPROC CreatePipeProc(HWND hwnd, UINT msg, UINT_PTR idEvent, DWORD dwTime) {
+    PipeWindow pipeWindow = PipeWindow();
+};
+
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     PWSTR pCmdLine, int nCmdShow) {
     MainWindow mainWindow = MainWindow(hInstance);
+    // PipeWindow pipeWindow = PipeWindow();
     PlayerWindow playerWindow = PlayerWindow();
 
-    // SetTimer(mainWindow.hwnd, 0, update_time, 0);
+    SetTimer(0, 1, pipe_spawn_rate, CreatePipe);
     SetTimer(playerWindow.hwnd, 0, update_time, 0);
-
     // Run message loop
     MSG msg = {};
     while (GetMessageW(&msg, 0, 0, 0) > 0) {
