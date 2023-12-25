@@ -39,8 +39,15 @@ class PipeWindow {
                                WINDOW_LENGTH, WINDOW_HEIGHT, FALSE) == 0)
                     // TODO: handle error
                     return -1;
-
                 break;
+            case WM_PAINT: {
+                PAINTSTRUCT ps;
+                HDC hdc = BeginPaint(hwnd, &ps);
+                HBRUSH solidBrush = CreateSolidBrush(RGB(0, 255, 0));
+                FillRect(hdc, &ps.rcPaint, solidBrush);
+                EndPaint(hwnd, &ps);
+                break;
+            }
             default:
                 return DefWindowProcW(hwnd, msg, wparam, lparam);
         };
@@ -123,7 +130,6 @@ class PlayerWindow {
                     return -1;
                     // TODO: handle error
                 };
-
                 velocity = velocity + gravity_scale;
                 if (MoveWindow(hwnd, playerPos.left, playerPos.top + velocity,
                                WINDOW_LENGTH, WINDOW_HEIGHT, FALSE) == 0)
@@ -131,14 +137,21 @@ class PlayerWindow {
                     return -1;
 
                 break;
-            case WM_DESTROY:
-                // Do nothing - quit message only sent from Main Window
             case WM_KEYDOWN:
                 if (wparam == VK_SPACE) {
                     OutputDebugStringW(L"Space was pressed.\n");
                     velocity = jumpForce;
                 };
                 break;
+            case WM_PAINT: {
+                OutputDebugStringW(L"WM_PAINT called");
+                PAINTSTRUCT ps;
+                HDC hdc = BeginPaint(hwnd, &ps);
+                HBRUSH solidBrush = CreateSolidBrush(RGB(255, 255, 0));
+                FillRect(hdc, &ps.rcPaint, solidBrush);
+                EndPaint(hwnd, &ps);
+                break;
+            }
             default:
                 return DefWindowProcW(hwnd, msg, wparam, lparam);
         };
@@ -153,9 +166,9 @@ class PlayerWindow {
         wc.hInstance = GetModuleHandle(NULL);
 
         RegisterClassExW(&wc);
-        hwnd = CreateWindowExW(
-            0, wc.lpszClassName, L"Player", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0,
-            0, WINDOW_LENGTH, WINDOW_HEIGHT, 0, 0, GetModuleHandle(NULL), 0);
+        hwnd = CreateWindowExW(0, wc.lpszClassName, L"Player", WS_VISIBLE, 0, 0,
+                               WINDOW_LENGTH, WINDOW_HEIGHT, 0, 0,
+                               GetModuleHandle(NULL), 0);
     };
 };
 
