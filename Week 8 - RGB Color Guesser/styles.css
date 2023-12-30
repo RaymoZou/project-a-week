@@ -1,5 +1,11 @@
 #color {
     width: 200px;
     height: 200px;
-    background-color: red;
-};
+}
+
+.container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
