@@ -1,0 +1,13 @@
+body {
+	background-color: lightblue;
+	margin: 0px;
+	padding: 0px;
+	font-family: sans-serif;
+}
+
+#color {
+	/* background-color: blue; */
+	width: 200px;
+	height: 200px;
+	border-radius: 10%;
+}
