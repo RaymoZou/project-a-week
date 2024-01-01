@@ -6,8 +6,19 @@ body {
 }
 
 #color {
-	/* background-color: blue; */
 	width: 200px;
 	height: 200px;
 	border-radius: 10%;
+}
+
+.container {
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+form {
+	display: flex;
 }
