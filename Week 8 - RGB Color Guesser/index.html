@@ -1,38 +1,35 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RGB Color Guesser</title>
-  <script type="text/javascript" src=index.js defer>
-
-  </script>
-  <link href="style.css" rel="stylesheet">
+  <script type="text/javascript" src="index.js" defer></script>
+  <link href="style.css" rel="stylesheet" />
 </head>
 
 <body>
   <div class="container">
-    <h1>
-      RGB Color Guesser
-    </h1>
+    <h1>RGB Color Guesser</h1>
     <div id="color"></div>
+    <button onclick="getColor()">New Color</button>
     <form id="form">
       <label for="red">red</label>
-      <input type="number" name="red">
+      <input type="number" min=0 max=256 name="red" required />
 
       <label for="green">green</label>
-      <input type="number" name="green">
+      <input type="number" min=0 max=256 name="green" required />
 
       <label for="blue">blue</label>
-      <input type="number" name="blue">
-
+      <input type="number" min=0 max=256 name="blue" required />
 
       <button type="submit">Submit</button>
     </form>
-    <div id="result"></div>
+    <div class="result" id="red_result"></div>
+    <div class="result" id="green_result"></div>
+    <div class="result" id="blue_result"></div>
   </div>
-
 </body>
 
 </html>

@@ -17,12 +17,21 @@ document.getElementById("form").addEventListener("submit", (e) => {
   const redGuess = formData.get("red");
   const greenGuess = formData.get("green");
   const blueGuess = formData.get("blue");
-  document.getElementById("result").textContent = `red guess: ${
-    redGuess / red
-  }}`;
-  console.log("red guess: ", redGuess / red);
-  console.log("green guess: ", greenGuess / green);
-  console.log("blue guess: ", blueGuess / blue);
+  document.getElementById("red_result").textContent = `
+  red guess: ${Math.abs(red - redGuess)} points ${
+    redGuess > red ? "above" : "below"
+  }
+   the actual red value.`;
+  document.getElementById("green_result").textContent = `
+  green guess: ${Math.abs(green - greenGuess)} points ${
+    greenGuess > green ? "above" : "below"
+  }
+   the actual green value.`;
+  document.getElementById("blue_result").textContent = `
+  blue guess: ${Math.abs(blue - blueGuess)} points ${
+    blueGuess > blue ? "above" : "below"
+  }
+   the actual blue value.`;
 });
 
 getColor();
