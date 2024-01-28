@@ -1,7 +1,8 @@
 <!-- using the Options API  -->
 <script lang="ts">
 import axios from 'axios';
-import { fromUnixTime } from 'date-fns'
+import { fromUnixTime } from 'date-fns';
+import Cookie from 'js-cookie';
 
 export default {
 
@@ -45,7 +46,7 @@ export default {
 				const response = await axios.get(`https://na1.api.riotgames.com/lol/status/v4/platform-data?api_key=${this.riotApi}`)
 				if (response.status === 200) {
 					this.apiStatus = true;
-					// TODO: set cookie
+					Cookie.set('api_key', this.riotApi)
 				} else {
 					console.log('nope')
 				}
@@ -53,6 +54,15 @@ export default {
 				// TODO: proper error handling
 				console.log(err)
 			}
+		}
+	},
+
+	mounted() {
+		// check cookies for api key
+		const key = Cookie.get('api_key');
+		if (key) {
+			this.riotApi = key;
+			this.apiStatus = true
 		}
 	},
 
