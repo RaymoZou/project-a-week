@@ -6,14 +6,21 @@ import Cookie from 'js-cookie';
 
 export default {
 
-	data() {
+	data(): {
+		lastGame: any,
+		puuid: string,
+		gameName: string,
+		tagLine: string,
+		apiStatus: boolean,
+		riotApi: string,
+	} {
 		return {
 			lastGame: null,
-			puuid: null,
-			gameName: null,
-			tagLine: null,
+			puuid: '',
+			gameName: '',
+			tagLine: '',
 			apiStatus: false,
-			riotApi: null,
+			riotApi: '',
 		}
 	},
 
@@ -54,15 +61,28 @@ export default {
 				// TODO: proper error handling
 				console.log(err)
 			}
+		},
+
+		async is_key_valid(key: string | undefined): Promise<boolean> {
+			console.log("checking")
+			try {
+				const res = await axios.get(`https://na1.api.riotgames.com/lol/status/v4/platform-data?api_key=${key}`)
+				return res.status === 200;
+			} catch (err) {
+				console.log(err)
+			}
+			return false;
 		}
+
 	},
 
 	mounted() {
-		// check cookies for api key
-		const key = Cookie.get('api_key');
-		if (key) {
+		// check cookies for api key AND if the api key is still valid
+		// TODO: this only checks if there api_key is not null, there is no check for whether or not the actual key is valid
+		const key: string | undefined = Cookie.get('api_key');
+		if (key !== undefined) {
 			this.riotApi = key;
-			this.apiStatus = true
+			this.apiStatus = true;
 		}
 	},
 
