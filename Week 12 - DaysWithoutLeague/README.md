@@ -1,4 +1,4 @@
-# Week 12 of Paw - Typescript Todo
+# Week 12 of Paw - Last League Game
 
 Single page application created with Vue that displays the player's last given League of Legends game.
 
