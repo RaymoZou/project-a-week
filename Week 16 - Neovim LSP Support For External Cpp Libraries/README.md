@@ -6,3 +6,26 @@ This week's project of the week is going to take form in more of a guide. Recent
 - Neovim (configurable text editor fork of vi)
 - nvim-lspconfig (lsp client)
 - clangd (lsp language server for c/cpp)
+
+## Problem:
+Neovim doesn't know where external header files are.
+
+## Solution:
+Specify where the clangd lsp language server should look for external files using the `compile_flags.txt` file.
+
+1. Create the `compile_flags.txt` file in the project root directory.
+2. Fill in the directories for `include` and `lib` with the `-I` and `-L` flags respectively.
+3. An example is shown below on how to do this with the [SDL](https://www.libsdl.org/) library
+
+![the problem](problem.png "clangd lsp errors")
+
+`compile_flags.txt`
+
+```
+-I/path/to/include
+-lSDL2
+-L/path/to/lib
+
+```
+
+![the solution](solved.png "no lsp errors")
