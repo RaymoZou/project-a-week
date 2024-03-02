@@ -20,7 +20,8 @@
 #define PADDLE_HEIGHT 100
 #define BALL_SIZE 10
 
-int BALL_VELOCITY = 1;
+float X_VELOCITY = 1;
+float Y_VELOCITY = 1;
 
 SDL_Rect left_wall{0, 0, WALL_WIDTH, HEIGHT};
 SDL_Rect right_wall{WIDTH - WALL_WIDTH, 0, WIDTH / 10, HEIGHT};
@@ -45,7 +46,7 @@ struct Vector2 {
   float x, y;
 };
 
-void ProcessInput(bool *isRunning) {
+void ProcessInput(bool *isRunning, Uint32 deltaTime) {
   // allocate memory for event
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
@@ -62,32 +63,45 @@ void ProcessInput(bool *isRunning) {
   };
 
   if (state[SDL_SCANCODE_W]) {
-    paddle.y -= 1;
+    paddle.y -= 1 * deltaTime;
   };
 
   if (state[SDL_SCANCODE_S]) {
-    paddle.y += 1;
+    paddle.y += 1 * deltaTime;
   };
 };
 
-// calculate the time since last framE
-void Update(Uint64 *time, Vector2 *ballVelocity) {
-  Uint64 currTime = SDL_GetTicks64(); // time elapsed in ms
-  Uint64 deltaTime = SDL_GetTicks64() - *time;
+// calculate the time since last frame
+void Update(Uint32 *time, bool *isRunning) {
+  Uint32 currTime = SDL_GetTicks64();          // time elapsed in ms
+  Uint32 deltaTime = SDL_GetTicks64() - *time; // time elapsed since last frame
   *time = currTime;
 
   // game loop logic as a function of deltaTime
+  // TODO: add paddle collision detection
 
-  // 1) ball x position
-  ball.x += ballVelocity->x;
-  if (ball.x > WIDTH | ball.x < 0) {
-    ballVelocity->x *= -1;
-  }
-
-  ball.y += ballVelocity->y;
-  if (ball.y > HEIGHT | ball.y < 0) {
-    ballVelocity->y *= -1;
+  // left wall
+  if (ball.x < 0 && X_VELOCITY != 1) {
+    X_VELOCITY *= -1;
   };
+  // right wall
+  if (ball.x > WIDTH && X_VELOCITY != -1) {
+    X_VELOCITY *= -1;
+  };
+  ball.x += X_VELOCITY * deltaTime;
+  
+  // top wall
+  if (ball.y < 0 && Y_VELOCITY != 1) {
+    Y_VELOCITY *= -1;
+  };
+  // bottom wall
+  if (ball.y > HEIGHT && Y_VELOCITY != -1) {
+    Y_VELOCITY *= -1;
+  };
+  ball.y += Y_VELOCITY * deltaTime;
+
+  // 3) process input
+  ProcessInput(isRunning, deltaTime);
 };
 
 void generateOutput(SDL_Renderer *renderer) {
@@ -110,9 +124,8 @@ int main(int argc, char *args[]) {
 
   SDL_Window *window;
   SDL_Renderer *renderer;
-  bool isRunning = true;          // game is running by default
-  Vector2 ball_velocity = {3, 1}; // TODO: initiate ball velocity randomly
-  Uint64 time = 0;                // ticks since initialization
+  bool isRunning = true; // game is running by default
+  Uint32 time = 0;       // ticks since initialization
 
   // SDL_Init
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -126,8 +139,9 @@ int main(int argc, char *args[]) {
   };
 
   // initialize renderer
-  renderer = SDL_CreateRenderer(
-      window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  // TODO: add vsync?
+  /* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC); */
+  renderer = SDL_CreateRenderer(window, -1, 0);
   if (!renderer) {
     SDL_Log("Failed to create renderer\n: %s", SDL_GetError());
   }
@@ -136,9 +150,8 @@ int main(int argc, char *args[]) {
 
   // game loop
   while (isRunning) {
-    // process input
-    ProcessInput(&isRunning);
-    Update(&time, &ball_velocity);
+    Update(&time, &isRunning);
+    /* ProcessInput(&isRunning); */
     generateOutput(renderer);
   };
 
