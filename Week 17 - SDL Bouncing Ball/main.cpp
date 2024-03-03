@@ -10,7 +10,9 @@
 #include "SDL_video.h"
 #include <SDL.h>
 #include <algorithm>
+#include <ctime>
 #include <iostream>
+#include <ostream>
 #include <stdio.h>
 
 #define HEIGHT 768
@@ -29,7 +31,7 @@ SDL_Rect right_wall{WIDTH - WALL_WIDTH, 0, WIDTH / 10, HEIGHT};
 // paddle at middle left of screen
 SDL_Rect paddle{
     0,
-    HEIGHT / 2 - PADDLE_HEIGHT / 2,
+    HEIGHT / 2 - PADDLE_HEIGHT / 2, // middle left of screen
     PADDLE_WIDTH,
     PADDLE_HEIGHT,
 };
@@ -63,11 +65,16 @@ void ProcessInput(bool *isRunning, Uint32 deltaTime) {
   };
 
   if (state[SDL_SCANCODE_W]) {
-    paddle.y -= 1 * deltaTime;
+    // if paddle is greater than 0;
+    if (paddle.y > 0) {
+      paddle.y -= 1 * deltaTime;
+    };
   };
 
   if (state[SDL_SCANCODE_S]) {
-    paddle.y += 1 * deltaTime;
+    if (paddle.y + PADDLE_HEIGHT < HEIGHT) {
+      paddle.y += 1 * deltaTime;
+    };
   };
 };
 
@@ -77,8 +84,16 @@ void Update(Uint32 *time, bool *isRunning) {
   Uint32 deltaTime = SDL_GetTicks64() - *time; // time elapsed since last frame
   *time = currTime;
 
+  /* std::cout << deltaTime / 1000.0f << std::endl; */
+  /* std::cout << *time << std::endl; */
+
   // game loop logic as a function of deltaTime
   // TODO: add paddle collision detection
+
+  if ((ball.x < PADDLE_WIDTH) && (paddle.y < ball.y) && (ball.y < paddle.y + PADDLE_HEIGHT) && (X_VELOCITY != 1)) {
+    printf("paddle collision detected x\n");
+    X_VELOCITY *= -1;
+  };
 
   // left wall
   if (ball.x < 0 && X_VELOCITY != 1) {
@@ -89,7 +104,7 @@ void Update(Uint32 *time, bool *isRunning) {
     X_VELOCITY *= -1;
   };
   ball.x += X_VELOCITY * deltaTime;
-  
+
   // top wall
   if (ball.y < 0 && Y_VELOCITY != 1) {
     Y_VELOCITY *= -1;
@@ -146,8 +161,6 @@ int main(int argc, char *args[]) {
     SDL_Log("Failed to create renderer\n: %s", SDL_GetError());
   }
 
-  // create SDL window
-
   // game loop
   while (isRunning) {
     Update(&time, &isRunning);
@@ -159,6 +172,6 @@ int main(int argc, char *args[]) {
   SDL_Quit();
   SDL_DestroyRenderer(renderer);
 
-  printf("nice (program exited successfully)\n");
+  printf("program exited successfully\n");
   return 0;
 };
