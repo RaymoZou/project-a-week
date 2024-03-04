@@ -87,8 +87,8 @@ private:
     deltaTime = SDL_GetTicks64() - ticksPassed; // time elapsed since last frame
     ticksPassed = currTime;
 
-    if ((ball.rect.x < PADDLE_WIDTH) && (paddle.y < ball.rect.y) &&
-        (ball.rect.y < paddle.y + PADDLE_HEIGHT) && (ball.velocity.x != 1)) {
+    // if ball and paddle intersect AND ball hasn't flipped velocity
+    if (SDL_HasIntersection(&ball.rect, &paddle) && (ball.velocity.x != 1)) {
       printf("paddle collision detected\n");
       ball.velocity.x *= -1;
     };
