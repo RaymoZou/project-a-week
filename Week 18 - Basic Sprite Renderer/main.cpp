@@ -1,114 +1,128 @@
-#include "SDL_error.h"
-#include "SDL_events.h"
+#include "Actor.cpp"
 #include "SDL_image.h"
-#include "SDL_keyboard.h"
-#include "SDL_log.h"
 #include "SDL_rect.h"
-#include "SDL_render.h"
-#include "SDL_scancode.h"
-#include "SDL_stdinc.h"
-#include "SDL_surface.h"
-#include "SDL_timer.h"
-#include "SDL_video.h"
 #include <SDL.h>
 #include <cstdio>
-#include <cstdlib>
 
-#define HEIGHT 400
-#define WIDTH 600
+#define HEIGHT 1080
+#define WIDTH 1920
 
 // global variables
 SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_Texture *playerTexture;
+SDL_Texture *blockTexture;
 bool isRunning = true;
 Uint64 tickCount = 0; // # of ticks since last frame
 Uint64 deltaTime;
+
+// load textures
+void LoadData() {
+  playerTexture = IMG_LoadTexture(renderer, "player.png");
+  blockTexture = IMG_LoadTexture(renderer, "block.png");
+};
 
 struct Vector2 {
   float x, y;
 };
 
-// TODO: refactor movement into PlayerController class
-class Player {
+class Block : public Actor {
 public:
-  const int size = 30;
-  const int moveSpeed = 1;
-  SDL_Rect playerRect;
-  const char *spritePath = "sprite.png"; // path to player sprite
+  const char *spritePath = "block.png";
+  const float moveSpeed = 0.1f;
 
-  // set player position to origin
-  Player() {
-    playerRect = {0, 0, size, size};
-    printf("player instantiated\n");
+  Block() { printf("block instantiated\n"); };
+
+  ~Block() { printf("block destroyed\n"); };
+
+  void Update() {
+    rect.y += moveSpeed * deltaTime;
+    if (rect.y > HEIGHT) {
+      rect.y = 0;
+    };
   };
+
+  void Test() { printf("i'm a block\n"); }
+};
+
+class Player : public Actor {
+public:
+  const float moveSpeed = 0.6f;
+  Player() { printf("player instantiated\n"); };
 
   // functions
   void Update() {
     const Uint8 *keyState = SDL_GetKeyboardState(NULL);
     if (keyState[SDL_SCANCODE_W]) {
-      playerRect.y -= moveSpeed * deltaTime;
+      rect.y -= moveSpeed * deltaTime;
     }
     if (keyState[SDL_SCANCODE_A]) {
-      playerRect.x -= moveSpeed * deltaTime;
+      rect.x -= moveSpeed * deltaTime;
     }
     if (keyState[SDL_SCANCODE_S]) {
-      playerRect.y += moveSpeed * deltaTime;
+      rect.y += moveSpeed * deltaTime;
     }
     if (keyState[SDL_SCANCODE_D]) {
-      playerRect.x += moveSpeed * deltaTime;
+      rect.x += moveSpeed * deltaTime;
     }
 
-    // TODO: refactor this out of here (does not belong in player input)
-    if (keyState[SDL_SCANCODE_ESCAPE])
+    if (keyState[SDL_SCANCODE_ESCAPE]) {
       isRunning = false;
+    };
   };
 };
 
 int main(int argc, char *argv[]) {
 
-  // initialize SDL: non-zero on failure
   int sdl_init = SDL_Init(SDL_INIT_VIDEO);
-
   window =
       SDL_CreateWindow("Basic Sprite Renderer", 100, 100, WIDTH, HEIGHT, 0);
-
   renderer = SDL_CreateRenderer(
       window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
   int img_init = IMG_Init(IMG_INIT_PNG);
-
-  // check for initialization failures
   if (!window | sdl_init | !renderer | !img_init) {
     SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s\n", SDL_GetError());
     return -1;
   };
 
+  LoadData();
+  Block *block = new Block();
   Player *player = new Player();
-  SDL_Surface *temp_surface = IMG_Load(player->spritePath);
-  playerTexture = SDL_CreateTextureFromSurface(renderer, temp_surface);
-  SDL_FreeSurface(temp_surface);
 
   while (isRunning) {
+
+    // calculate deltaTime
+    deltaTime = SDL_GetTicks64() - tickCount;
+    tickCount = SDL_GetTicks64();
+
     SDL_Event event;
     SDL_PollEvent(&event);
     if (event.type == SDL_QUIT) {
       isRunning = false;
     };
 
-    // calculate deltaTime
-    deltaTime = SDL_GetTicks64() - tickCount;
-    tickCount = SDL_GetTicks64();
+    const Uint8 *keyState = SDL_GetKeyboardState(NULL);
+    if (keyState[SDL_SCANCODE_F]) {
+      if (block) {
+        delete block;
+        block = nullptr;
+      }
+    };
 
     // update game logic (includes polling player input)
+    // Get all actors and update them
     player->Update();
+    if (block)
+      block->Update();
 
+    // update screen
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
+    if (block) {
+      SDL_RenderCopyF(renderer, blockTexture, NULL, &block->rect);
+    };
+    SDL_RenderCopyF(renderer, playerTexture, NULL, &player->rect);
 
-    // render player
-    SDL_Rect src = {0, 0, 16, 16};
-    SDL_RenderCopy(renderer, playerTexture, &src, &player->playerRect);
     SDL_RenderPresent(renderer);
   };
 
