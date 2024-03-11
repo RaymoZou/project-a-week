@@ -5,6 +5,11 @@ A basic renderer for sprites created using SDL and the SDL_image libraries.
 ## How to compile:
 - You'll need to add the `include` and `lib` directories of the SDL2 library with compile flags.
 - Here's an example of a basic `Makefile` which uses the `mingw` compiler (note the `winmm` and `lmingw32` libraries)
+
+## Usage:
+- Press 'T' to spawn new blocks
+- Press 'F' to delete blocks
+
 ```
 CC = g++
 INCLUDES = -I\Path\To\include

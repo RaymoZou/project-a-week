@@ -7,16 +7,16 @@
 class Actor {
 public:
   SDL_FRect rect;
-  const float size = 64.0f;
+  const float size = 32.0f;
 
   Actor() {
     rect = {0, 0, size, size};
-    printf("actor constructor\n");
+    // printf("actor constructor\n");
   };
 
-  ~Actor() {
+  virtual ~Actor() {
       printf("actor dead\n");
   };
 
-  void Update();
+  virtual void Update() = 0;
 };

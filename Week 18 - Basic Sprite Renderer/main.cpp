@@ -2,7 +2,10 @@
 #include "SDL_image.h"
 #include "SDL_rect.h"
 #include <SDL.h>
+#include <algorithm>
 #include <cstdio>
+#include <cstdlib>
+#include <vector>
 
 #define HEIGHT 1080
 #define WIDTH 1920
@@ -16,33 +19,40 @@ bool isRunning = true;
 Uint64 tickCount = 0; // # of ticks since last frame
 Uint64 deltaTime;
 
-// load textures
-void LoadData() {
-  playerTexture = IMG_LoadTexture(renderer, "player.png");
-  blockTexture = IMG_LoadTexture(renderer, "block.png");
-};
-
 struct Vector2 {
   float x, y;
 };
 
 class Block : public Actor {
 public:
-  const char *spritePath = "block.png";
-  const float moveSpeed = 0.1f;
+  Vector2 moveSpeed;
 
-  Block() { printf("block instantiated\n"); };
-
+  Block() {
+    float r1 = -1.0f + static_cast<float>(
+                           rand() / static_cast<float>((RAND_MAX / 2.0f)));
+    float r2 = -1.0f + static_cast<float>(
+                           rand() / static_cast<float>((RAND_MAX / 2.0f)));
+    moveSpeed = {r1, r2};
+    // printf("block instantiated\n");
+  };
   ~Block() { printf("block destroyed\n"); };
 
   void Update() {
-    rect.y += moveSpeed * deltaTime;
-    if (rect.y > HEIGHT) {
-      rect.y = 0;
+    if (rect.y > HEIGHT && (moveSpeed.y > 0)) {
+      moveSpeed.y *= -1;
     };
+    if (rect.y < 0 && (moveSpeed.y < 0)) {
+      moveSpeed.y *= -1;
+    };
+    if (rect.x > WIDTH && (moveSpeed.x > 0)) {
+      moveSpeed.x *= -1;
+    };
+    if (rect.x < 0 && (moveSpeed.x < 0)) {
+      moveSpeed.x *= -1;
+    };
+    rect.y += moveSpeed.y * deltaTime;
+    rect.x += moveSpeed.x * deltaTime;
   };
-
-  void Test() { printf("i'm a block\n"); }
 };
 
 class Player : public Actor {
@@ -72,6 +82,27 @@ public:
   };
 };
 
+// testing
+std::vector<class Actor *> actors;
+
+// load textures
+void LoadData() {
+  playerTexture = IMG_LoadTexture(renderer, "player.png");
+  blockTexture = IMG_LoadTexture(renderer, "block.png");
+};
+
+void Render() {
+
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+  SDL_RenderClear(renderer);
+
+  for (auto actor : actors) {
+    SDL_RenderCopyF(renderer, blockTexture, NULL, &actor->rect);
+  };
+
+  SDL_RenderPresent(renderer);
+};
+
 int main(int argc, char *argv[]) {
 
   int sdl_init = SDL_Init(SDL_INIT_VIDEO);
@@ -88,9 +119,13 @@ int main(int argc, char *argv[]) {
   LoadData();
   Block *block = new Block();
   Player *player = new Player();
+  actors.emplace_back(player);
+  actors.emplace_back(block);
+
+  // should be 2 (1 for block and 1 for player);
+  printf("%d\n", actors.size());
 
   while (isRunning) {
-
     // calculate deltaTime
     deltaTime = SDL_GetTicks64() - tickCount;
     tickCount = SDL_GetTicks64();
@@ -102,28 +137,38 @@ int main(int argc, char *argv[]) {
     };
 
     const Uint8 *keyState = SDL_GetKeyboardState(NULL);
+
+    // if (keyState[SDL_SCANCODE_F] & (block != nullptr)) {
+    //   auto iter = std::find(actors.begin(), actors.end(), block);
+    //   if (iter != actors.end()) {
+    //     std::iter_swap(iter, actors.end() - 1);
+    //     actors.pop_back();
+    //   }
+    //   delete block;
+    //   block = nullptr;
+    // };
+    //
     if (keyState[SDL_SCANCODE_F]) {
-      if (block) {
-        delete block;
-        block = nullptr;
+      // if there are no actors, return
+      if (!actors.empty()) {
+        Actor *last_actor = actors.back();
+        actors.pop_back();
+        delete last_actor;
+        last_actor = nullptr;
       }
     };
 
-    // update game logic (includes polling player input)
-    // Get all actors and update them
-    player->Update();
-    if (block)
-      block->Update();
-
-    // update screen
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
-    if (block) {
-      SDL_RenderCopyF(renderer, blockTexture, NULL, &block->rect);
+    if (keyState[SDL_SCANCODE_T]) {
+      Block *new_block = new Block();
+      actors.emplace_back(new_block);
     };
-    SDL_RenderCopyF(renderer, playerTexture, NULL, &player->rect);
 
-    SDL_RenderPresent(renderer);
+    // update all actors
+    for (auto actor : actors) {
+      actor->Update();
+    };
+
+    Render();
   };
 
   SDL_DestroyWindow(window);
