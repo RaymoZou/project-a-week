@@ -1,9 +1,9 @@
-#include "game.hpp"
+#include "game.cpp"
 #include <cstdio>
 
 int main(int argc, char *args[]) {
   Game game;
   game.Initialize();
-  game.RunGameLoop();
+  game.Update();
   return 0;
 };
