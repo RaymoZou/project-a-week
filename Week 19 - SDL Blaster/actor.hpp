@@ -9,7 +9,7 @@
 // 2) have a position
 class Actor {
 public:
-  SDL_Rect rect;
+  SDL_FRect rect;
   Actor(Game *game);
   virtual void Update(float deltaTime) = 0;
 };
