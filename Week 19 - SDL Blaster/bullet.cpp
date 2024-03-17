@@ -4,13 +4,16 @@
 // y is the y position
 // w is the width of the rect
 // h is the width of the rect
-Bullet::Bullet(Game *game, float x = 0, float y = 0, float w = 10, float h = 10)
+// x_vel = x velocity
+// y_vel = y velocity
+Bullet::Bullet(Game *game, SDL_FRect frect, float xvel, float yvel)
     : Actor(game) {
-  rect = {x, y, w, h};
+  rect = frect;
+  x_velocity = xvel;
+  y_velocity = yvel;
 };
 
-
 void Bullet::Update(float deltaTime) {
-    rect.x += x_velocity * deltaTime;
-    rect.y += y_velocity * deltaTime;
+  rect.x += x_velocity * deltaTime;
+  rect.y += y_velocity * deltaTime;
 };
