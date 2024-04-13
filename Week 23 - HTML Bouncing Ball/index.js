@@ -7,15 +7,22 @@ const WIDTH = canvas.width;
 const BALL_SIZE = 10;
 const FPS = 60;
 
-var x = 0;
-var y = 0;
+var x = WIDTH / 2;
+var y = HEIGHT / 2;
 var x_velocity = 2;
 var y_velocity = 2;
+
+function reset() {
+    console.info("resetting game");
+    x = WIDTH / 2;
+    y = HEIGHT / 2;
+};
 
 function render() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT); // clear the canvas
     ctx.fillRect(x, y, BALL_SIZE, BALL_SIZE);
 };
+
 function update() {
     if (x <= 0 && x_velocity < 0) x_velocity *= -1;
     if (x >= WIDTH && x_velocity > 0) x_velocity *= -1;
@@ -30,6 +37,4 @@ function runGame() {
     render();
 };
 
-// core game loop
-// 60 frames per second = 
 setInterval(runGame, 1000 / FPS);
