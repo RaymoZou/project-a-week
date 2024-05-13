@@ -1,3 +1,3 @@
-# Week 27 of Paw - OpenGL Cube
+# Week 27 of Paw - OpenGL Triangle
 
-Simple cube rendered with OpenGL and SDL2.
+Simple cube rendered with OpenGL and GLFW.
