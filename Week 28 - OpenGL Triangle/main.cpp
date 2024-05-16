@@ -39,6 +39,8 @@ int main() {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
 
+  // TODO: load vertex shader as a C string
+
   while (!shouldClose) {
     SDL_Event event;
     SDL_PollEvent(&event);
