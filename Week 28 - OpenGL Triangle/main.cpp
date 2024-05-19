@@ -14,19 +14,16 @@ int main() {
   SDL_Window *window =
       SDL_CreateWindow("PAW - Week 27", 100, 100, 1024, 768, SDL_WINDOW_OPENGL);
 
-  if (!glewInit()) {
-    SDL_Log("Error: %s\n", SDL_GetError());
-  };
-
   // request and check OpenGL core version
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_CreateContext(window);
-  int major, minor;
-  /* SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major); */
-  /* SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor); */
-  /* SDL_Log("opengl version: %d.%d\n", major, minor); */
+  SDL_Log("%s\n", glGetString(GL_VERSION));
+
+  if (!glewInit()) {
+    SDL_Log("Error: %s\n", SDL_GetError());
+  };
 
   float vertices[6] = {-0.5f, 0.0f, 0.0f, 0.5f, 0.5f, 0.0f};
   SDL_bool shouldClose = SDL_FALSE;
@@ -38,8 +35,6 @@ int main() {
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
-
-  // TODO: load vertex shader as a C string
 
   while (!shouldClose) {
     SDL_Event event;
