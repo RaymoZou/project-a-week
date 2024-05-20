@@ -12,7 +12,7 @@
 #include <iostream>
 #include <sstream>
 
-// reads contents of .glsl file into a C like string
+// reads contents of .glsl file into a C like string stored into result
 void parseGLSL(std::string file_path, char *&result) {
   std::ifstream file(file_path);
 
@@ -53,6 +53,12 @@ int main() {
 
   glClearColor(0.2f, 0.2f, 0.0f, 1.0f);
 
+  // load the vertex and fragment shader code into c strings
+  // create shader objects with c strings
+  // compile shaders
+  // create program
+  // attach shaders
+  // link program
   char *vertex_shader_src, *fragment_shader_src;
   parseGLSL("vertex_shader.glsl", vertex_shader_src);
   parseGLSL("fragment_shader.glsl", fragment_shader_src);
