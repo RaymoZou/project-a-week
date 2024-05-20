@@ -6,13 +6,36 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_stdinc.h>
 #include <SDL2/SDL_video.h>
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+
+// reads contents of .glsl file into a C like string
+void parseGLSL(std::string file_path, char *&result) {
+  std::ifstream file(file_path);
+
+  if (!file.is_open()) {
+    std::cout << "file not found" << std::endl;
+  } else {
+    std::cout << "file opened successfully" << std::endl;
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    file.close();
+    std::string temp = buffer.str();
+
+    result = (char *)malloc(sizeof(char) * temp.length() + 1);
+    strcpy(result, temp.c_str());
+  }
+};
 
 int main() {
   SDL_Log("hello world\n");
 
   // TODO: check for failure
   SDL_Window *window =
-      SDL_CreateWindow("PAW - Week 27", 100, 100, 1024, 768, SDL_WINDOW_OPENGL);
+      SDL_CreateWindow("PAW - Week 27", 100, 100, 500, 350, SDL_WINDOW_OPENGL);
 
   // request and check OpenGL core version
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -30,26 +53,14 @@ int main() {
 
   glClearColor(0.2f, 0.2f, 0.0f, 1.0f);
 
-  // vertex shader
-  const char *vertex_shader_source =
-      "#version 330 core\n"
-      "layout (location = 0) in vec3 aPos;\n"
-      "void main()\n"
-      "{\n"
-      "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-      "}\0";
-  const char *frag_shader_src = "#version 330 core\n"
-                                "out vec4 FragColor;\n"
-                                "void main()\n"
-                                "{\n"
-                                "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-                                "}\0";
+  char *vertex_shader_src, *fragment_shader_src;
+  parseGLSL("vertex_shader.glsl", vertex_shader_src);
+  parseGLSL("fragment_shader.glsl", fragment_shader_src);
 
   // compile shader
   unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
+  glShaderSource(vertex_shader, 1, &vertex_shader_src, NULL);
   glCompileShader(vertex_shader);
-
   int success;
   char infoLog[512];
   glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
@@ -59,7 +70,7 @@ int main() {
   };
 
   unsigned int frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(frag_shader, 1, &frag_shader_src, NULL);
+  glShaderSource(frag_shader, 1, &fragment_shader_src, NULL);
   glCompileShader(frag_shader);
   glGetShaderiv(frag_shader, GL_COMPILE_STATUS, &success);
   if (!success) {
@@ -101,13 +112,6 @@ int main() {
     glDrawArrays(GL_TRIANGLES, 0, 3);
     SDL_GL_SwapWindow(window);
   };
-  /* glClearColor(1.0f, 0.0f, 0.0f, 1.0f); */
-  /* glClear(GL_COLOR_BUFFER_BIT); */
-  /* glUseProgram(shaderProgram); */
-  /* glBindVertexArray(vao); */
-  /* glDrawArrays(GL_TRIANGLES, 0, 3); */
-
-  /* SDL_Delay(2500); */
 
   return 0;
 };
