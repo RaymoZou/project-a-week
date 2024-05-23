@@ -3,13 +3,34 @@
 #include <SDL2/SDL_log.h>
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
+#include <fstream>
+#include <sstream>
+#include <string>
 
-unsigned int programID, VBO, VAO, vertex_shader, fragment_shader;
+unsigned int program, VBO, VAO, vs, fs;
 SDL_Window *window;
 bool close;
 
 // TODO: add index buffer object to reuse vertices
-// TODO: add shaders
+char *parseGLSL(std::string file_path) {
+  char *result = NULL;
+  std::ifstream file(file_path);
+
+  if (!file.is_open()) {
+    SDL_Log("could not open file\n");
+  } else {
+    SDL_Log("file opened successfully\n");
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    file.close();
+    std::string temp = buffer.str();
+
+    result = (char *)malloc(sizeof(char) * temp.length() + 1);
+    strcpy(result, temp.c_str());
+  }
+  return result;
+};
+
 int main() {
   close = false;
   window = SDL_CreateWindow("Week 29 - OpenGL Cube", 0, 0, 800, 600,
@@ -24,22 +45,41 @@ int main() {
   glClearColor(0.75f, 0.75f, 0.90f, 1.0f); // set buffer clear color
 
   glGenVertexArrays(1, &VAO);
-  SDL_Log("OpenGL Error Code: %d\n", glGetError());
   glBindVertexArray(VAO);
-  const float vertices[] = {
-      0.5f, -0.5f,
-      -0.5f, -0.5f,
-      -0.5f, 0.5f,
-
-      0.5f, -0.5f,
-      -0.5f, 0.5f,
-      0.5f, 0.5f
-  };
+  const float vertices[] = {0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f,
+                            0.5f, -0.5f, -0.5f, 0.5f,  0.5f,  0.5f};
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  // param 1: starting index of array buffer
+  // param 2: size of vertex attribute
+  // param 3: GL_FLOAT
+  // param 4: should normalize coordinates? (no);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
   glEnableVertexAttribArray(0);
+
+  // shaders
+  vs = glCreateShader(GL_VERTEX_SHADER);
+  fs = glCreateShader(GL_FRAGMENT_SHADER);
+  char *vs_src = parseGLSL("vs.glsl");
+  char *fs_src = parseGLSL("fs.glsl");
+  glShaderSource(vs, 1, &vs_src, NULL);
+  glShaderSource(fs, 1, &fs_src, NULL);
+  glCompileShader(vs);
+  glCompileShader(fs);
+  // check compilation of vertex shader
+  GLint vs_compile_status;
+  glGetShaderiv(vs, GL_COMPILE_STATUS, &vs_compile_status);
+  SDL_Log("vertex shader compile status: %d\n", vs_compile_status);
+  // check compilation of fragment shader
+  GLint fs_compile_status;
+  glGetShaderiv(fs, GL_COMPILE_STATUS, &fs_compile_status);
+  SDL_Log("fragment shader compile status: %d\n", fs_compile_status);
+  program = glCreateProgram();
+  glAttachShader(program, vs);
+  glAttachShader(program, fs);
+  glLinkProgram(program);
+  SDL_Log("OpenGL Error Code: %d\n", glGetError());
 
   while (!close) {
     // handle window close event
@@ -50,6 +90,7 @@ int main() {
     };
     glClear(GL_COLOR_BUFFER_BIT);
     glBindVertexArray(VAO);
+    glUseProgram(program);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     SDL_GL_SwapWindow(window);
   };
