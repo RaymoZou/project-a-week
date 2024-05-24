@@ -7,7 +7,7 @@
 #include <sstream>
 #include <string>
 
-unsigned int program, VBO, VAO, vs, fs;
+unsigned int program, VBO, VAO, EBO, vs, fs;
 SDL_Window *window;
 bool close;
 
@@ -46,8 +46,12 @@ int main() {
 
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
-  const float vertices[] = {0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f,
-                            0.5f, -0.5f, -0.5f, 0.5f,  0.5f,  0.5f};
+  const float vertices[] = {
+      0.5f,  -0.5f, // 0 bottom right
+      -0.5f, -0.5f, // 1 bottom left
+      -0.5f, 0.5f,  // 2 top left
+      0.5f,  0.5f   // 3 top right
+  };
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -60,17 +64,18 @@ int main() {
 
   // shaders
   vs = glCreateShader(GL_VERTEX_SHADER);
-  fs = glCreateShader(GL_FRAGMENT_SHADER);
   char *vs_src = parseGLSL("vs.glsl");
-  char *fs_src = parseGLSL("fs.glsl");
   glShaderSource(vs, 1, &vs_src, NULL);
-  glShaderSource(fs, 1, &fs_src, NULL);
   glCompileShader(vs);
-  glCompileShader(fs);
   // check compilation of vertex shader
   GLint vs_compile_status;
   glGetShaderiv(vs, GL_COMPILE_STATUS, &vs_compile_status);
   SDL_Log("vertex shader compile status: %d\n", vs_compile_status);
+
+  fs = glCreateShader(GL_FRAGMENT_SHADER);
+  char *fs_src = parseGLSL("fs.glsl");
+  glShaderSource(fs, 1, &fs_src, NULL);
+  glCompileShader(fs);
   // check compilation of fragment shader
   GLint fs_compile_status;
   glGetShaderiv(fs, GL_COMPILE_STATUS, &fs_compile_status);
@@ -80,6 +85,14 @@ int main() {
   glAttachShader(program, fs);
   glLinkProgram(program);
   SDL_Log("OpenGL Error Code: %d\n", glGetError());
+
+  // element buffer object
+  unsigned int indices[] = {0, 1, 3,
+
+                            1, 2, 3};
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
   while (!close) {
     // handle window close event
@@ -91,7 +104,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
     glBindVertexArray(VAO);
     glUseProgram(program);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     SDL_GL_SwapWindow(window);
   };
 
