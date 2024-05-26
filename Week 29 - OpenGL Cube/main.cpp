@@ -1,39 +1,19 @@
 #define STB_IMAGE_IMPLEMENTATION
 
 #include "GL/glew.h"
+#include "shader.h"
 #include "stb_image.h"
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_log.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
-#include <fstream>
-#include <sstream>
 #include <string>
 
-unsigned int program, VBO, VAO, EBO, vs, fs;
+unsigned int program, VBO, VAO, EBO;
 SDL_Window *window;
 bool close;
 int texture_w, texture_h, numChannels;
-
-char *parseGLSL(std::string file_path) {
-  char *result = NULL;
-  std::ifstream file(file_path);
-
-  if (!file.is_open()) {
-    SDL_Log("could not open file\n");
-  } else {
-    SDL_Log("file opened successfully\n");
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    file.close();
-    std::string temp = buffer.str();
-
-    result = (char *)malloc(sizeof(char) * temp.length() + 1);
-    strcpy(result, temp.c_str());
-  }
-  return result;
-};
 
 int main() {
   close = false;
@@ -60,48 +40,24 @@ int main() {
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-  // param 1: starting index of array buffer
-  // param 2: size of vertex attribute
-  // param 3: GL_FLOAT
-  // param 4: should normalize coordinates? (no);
 
-  // position attribute #0 (vec2)
+  // configure vertex attributes
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), 0);
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(0);
-
-  // color attribute #1 (vec3);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float),
                         (void *)(2 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-
-  // texture coordinate attribute #2 (vec2);
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float),
                         (void *)(5 * sizeof(float)));
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
   glEnableVertexAttribArray(2);
 
-  // TODO: info logs for shader compilation failure
   // shaders
-  vs = glCreateShader(GL_VERTEX_SHADER);
-  char *vs_src = parseGLSL("vs.glsl");
-  glShaderSource(vs, 1, &vs_src, NULL);
-  glCompileShader(vs);
-  // check compilation of vertex shader
-  GLint vs_compile_status;
-  glGetShaderiv(vs, GL_COMPILE_STATUS, &vs_compile_status);
-  SDL_Log("vertex shader compile status: %d\n", vs_compile_status);
+  Shader vs("vs.glsl", GL_VERTEX_SHADER);
+  Shader fs("fs.glsl", GL_FRAGMENT_SHADER);
 
-  fs = glCreateShader(GL_FRAGMENT_SHADER);
-  char *fs_src = parseGLSL("fs.glsl");
-  glShaderSource(fs, 1, &fs_src, NULL);
-  glCompileShader(fs);
-  // check compilation of fragment shader
-  GLint fs_compile_status;
-  glGetShaderiv(fs, GL_COMPILE_STATUS, &fs_compile_status);
-  SDL_Log("fragment shader compile status: %d\n", fs_compile_status);
   program = glCreateProgram();
-  glAttachShader(program, vs);
-  glAttachShader(program, fs);
+  glAttachShader(program, vs.id);
+  glAttachShader(program, fs.id);
   glLinkProgram(program);
 
   // element buffer object
