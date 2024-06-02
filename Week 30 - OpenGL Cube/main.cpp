@@ -7,7 +7,6 @@
 #include <glm/fwd.hpp>
 #include <glm/matrix.hpp>
 #include <glm/vec2.hpp>
-#include <iostream>
 
 unsigned char open = 1;
 unsigned int vbo;
@@ -26,26 +25,25 @@ int main() {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, 6, NULL, GL_STATIC_DRAW);
 
-  // pos:
-  // -1
-  //  2
-  glm::vec2 pos(-1, 2);
-  // transform:
-  //  1 3
-  // -2 0
-  glm::mat2 transform = glm::mat2(glm::vec2(1, 3), glm::vec2(-2, 0));
-  // result:
-  // -1(1)  + 2(3) = 5
-  //  2(-2) + 0()
-  glm::vec2 result = pos * transform;
-  std::cout << result.x << " " << result.y << std::endl;
+  glm::vec2 pos(3, 1);
+  glm::mat2 transform;
+  transform[0][0] = -1.0f;
+  transform[0][1] = 0.0f;
+  transform[1][0] = 0.0f;
+  transform[1][1] = -1.0f;
+  glm::vec2 result = transform * pos;
+  SDL_Log("x: %f\n", result.x);
+  SDL_Log("y: %f\n", result.y);
 
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   while (open) {
     SDL_Event e;
     SDL_PollEvent(&e);
     if (e.type == SDL_QUIT) {
       open = 0;
     };
+    glClear(GL_COLOR_BUFFER_BIT);
+    SDL_GL_SwapWindow(window);
   };
   return 0;
 };
