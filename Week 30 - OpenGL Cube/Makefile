@@ -1,2 +1,2 @@
 main:
-	g++ main.cpp -o a.out -lSDL2 -lGLEW -lGL
+	g++ main.cpp shader.cpp -o a.out -lSDL2 -lGLEW -lGL

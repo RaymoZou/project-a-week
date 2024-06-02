@@ -1,3 +1,4 @@
+#include "shader.h"
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
@@ -9,7 +10,7 @@
 #include <glm/vec2.hpp>
 
 unsigned char open = 1;
-unsigned int vbo;
+unsigned int vbo, vao;
 
 int main() {
   SDL_Window *window =
@@ -20,22 +21,41 @@ int main() {
   glewInit();
   SDL_Log("OpenGL version: %s\n", glGetString(GL_VERSION));
 
-  const float indices[] = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f};
+  // vao
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+  float vertices[] = {0.0f, 0.0f,  // bottom left
+                      1.0f, 0.0f,  // bottom right
+                      0.0f, 1.0f}; // top
+
+  // vbo
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, 6, NULL, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  glm::vec2 pos(3, 1);
-  glm::mat2 transform;
-  transform[0][0] = -1.0f;
-  transform[0][1] = 0.0f;
-  transform[1][0] = 0.0f;
-  transform[1][1] = -1.0f;
-  glm::vec2 result = transform * pos;
-  SDL_Log("x: %f\n", result.x);
-  SDL_Log("y: %f\n", result.y);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  glEnableVertexAttribArray(0);
 
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  // shaders
+  Shader vs("vs.glsl", GL_VERTEX_SHADER);
+  Shader fs("fs.glsl", GL_FRAGMENT_SHADER);
+  unsigned int program = glCreateProgram();
+  glAttachShader(program, vs.id);
+  glAttachShader(program, fs.id);
+  glLinkProgram(program);
+
+  /* glm::vec2 pos(-1, 2); */
+  /* glm::mat2 transform; */
+  /* transform[0][0] = 1.0f; */
+  /* transform[0][1] = -2.0f; */
+  /* transform[1][0] = 3.0f; */
+  /* transform[1][1] = 0.0f; */
+  /* glm::vec2 result = transform * pos; */
+  /* SDL_Log("x: %f\n", result.x); */
+  /* SDL_Log("y: %f\n", result.y); */
+
+  /* glClearColor(0.0f, 0.0f, 0.0f, 1.0f); */
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   while (open) {
     SDL_Event e;
     SDL_PollEvent(&e);
@@ -43,6 +63,9 @@ int main() {
       open = 0;
     };
     glClear(GL_COLOR_BUFFER_BIT);
+    glBindVertexArray(vao);
+    glUseProgram(program);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
     SDL_GL_SwapWindow(window);
   };
   return 0;
