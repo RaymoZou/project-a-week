@@ -14,7 +14,7 @@ unsigned int vbo, vao;
 
 int main() {
   SDL_Window *window =
-      SDL_CreateWindow("PAW - Week 30", 0, 0, 300, 300, SDL_WINDOW_OPENGL);
+      SDL_CreateWindow("PAW - Week 30", 0, 0, 1024, 768, SDL_WINDOW_OPENGL);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
   SDL_GL_CreateContext(window);
@@ -43,6 +43,13 @@ int main() {
   glAttachShader(program, vs.id);
   glAttachShader(program, fs.id);
   glLinkProgram(program);
+
+  // uniforms
+  int colorLocation = glGetUniformLocation(program, "u_color");
+  glUseProgram(program);
+  glUniform4f(colorLocation, 0.5f, 0.0f, 1.0f, 1.0f);
+  int offsetLocation = glGetUniformLocation(program, "u_offset");
+  glUniform4f(offsetLocation, -0.5f, 0.0f, 0.0f, 0.0f);
 
   /* glm::vec2 pos(-1, 2); */
   /* glm::mat2 transform; */
